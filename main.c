@@ -1,12 +1,12 @@
-#include<mpi.h>
-#include<stdio.h>
-#include<stdlib.h>
+#include <mpi.h>
+#include <stdio.h>
+#include <stdlib.h>
 #ifndef NO_FFTW
-#include<fftw3-mpi.h>
-#include<fftw3.h>
+#include <fftw3-mpi.h>
+#include <fftw3.h>
 #endif /*NO_FFTW*/
-#include"read_athena_binary.h"
-#include"routines.h"
+#include "read_athena_binary.h"
+#include "routines.h"
 
 
 int main(int argc, char **argv)
@@ -91,11 +91,110 @@ int main(int argc, char **argv)
 			}
 
 	FILE *fp;
-	fp = 
+	char fxout[200];
+
+	sprintf(fxout,"density.%04d.dat",isnap);
+	fp = fopen(fxout,"w");
+	fwrite(fp,&A.nx,1,sizeof(int));
+	fwrite(fp,&A.ny,1,sizeof(int));
+	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
+	fclose(fp);
+
+	//total velocity next
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			xout[i*ny+j] = 0.0;
+
+	double vx, vy, vz;
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			for(int k=0;k<A.nz;k++)
+			{
+				ijk = grid_ijk(i,j,k,A.grid_info);
+				vx = A.velocity[0][ijk];
+				vy = A.velocity[1][ijk];
+				vz = A.velocity[2][ijk];
+
+				xout[i*ny + j] += sqrt(vx*vx + vy*vy + vz*vz);
+			}
+
+	sprintf(fxout,"vtot.%04d.dat",isnap);
+	fp = fopen(fxout,"w");
+	fwrite(fp,&A.nx,1,sizeof(int));
+	fwrite(fp,&A.ny,1,sizeof(int));
+	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
+	fclose(fp);
+
+	//x velocity next
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			xout[i*ny+j] = 0.0;
+
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			for(int k=0;k<A.nz;k++)
+			{
+				ijk = grid_ijk(i,j,k,A.grid_info);
+				vx = A.velocity[0][ijk];
+
+				xout[i*ny + j] += vx;
+			}
+
+	sprintf(fxout,"vx.%04d.dat",isnap);
+	fp = fopen(fxout,"w");
+	fwrite(fp,&A.nx,1,sizeof(int));
+	fwrite(fp,&A.ny,1,sizeof(int));
+	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
+	fclose(fp);
 
 
+	//y velocity next
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			xout[i*ny+j] = 0.0;
+
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			for(int k=0;k<A.nz;k++)
+			{
+				ijk = grid_ijk(i,j,k,A.grid_info);
+				vx = A.velocity[1][ijk];
+
+				xout[i*ny + j] += vy;
+			}
+
+	sprintf(fxout,"vy.%04d.dat",isnap);
+	fp = fopen(fxout,"w");
+	fwrite(fp,&A.nx,1,sizeof(int));
+	fwrite(fp,&A.ny,1,sizeof(int));
+	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
+	fclose(fp);
 
 
+	//z velocity next
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			xout[i*ny+j] = 0.0;
+	memset(xout,0,A.nx*A.ny*sizeof(double));
+
+	for(int i=0;i<A.nx;i++)
+		for(int j=0;j<A.ny;j++)
+			for(int k=0;k<A.nz;k++)
+			{
+				ijk = grid_ijk(i,j,k,A.grid_info);
+				vz = A.velocity[2][ijk];
+
+				xout[i*ny + j] += vz;
+			}
+
+	sprintf(fxout,"vz.%04d.dat",isnap);
+	fp = fopen(fxout,"w");
+	fwrite(fp,&A.nx,1,sizeof(int));
+	fwrite(fp,&A.ny,1,sizeof(int));
+	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
+	fclose(fp);
+
+	free(xout);
 
 	//sprintf(filename,"test.dat");
 	//A.WriteAthenaBinary(filename);
