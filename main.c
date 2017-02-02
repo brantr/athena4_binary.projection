@@ -1,6 +1,8 @@
 #include <mpi.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
+
 #ifndef NO_FFTW
 #include <fftw3-mpi.h>
 #include <fftw3.h>
@@ -79,6 +81,8 @@ int main(int argc, char **argv)
 			MPI_Barrier(A.world);
 		}*/
 
+  int nx = A.nx;
+  int ny = A.ny;
 	xout = (double *) calloc(A.nx*A.ny,sizeof(double *));
 
 	//density first
@@ -93,12 +97,13 @@ int main(int argc, char **argv)
 	FILE *fp;
 	char fxout[200];
 
+
 	sprintf(fxout,"density.%04d.dat",isnap);
-	fp = fopen(fxout,"w");
-	fwrite(fp,&A.nx,1,sizeof(int));
-	fwrite(fp,&A.ny,1,sizeof(int));
-	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
-	fclose(fp);
+  fp = fopen(fxout,"w");
+  fwrite(&A.nx,sizeof(int),1,fp);
+  fwrite(&A.ny,sizeof(int),1,fp);
+  fwrite(xout,sizeof(double),A.nx*A.ny,fp);
+  fclose(fp);
 
 	//total velocity next
 	for(int i=0;i<A.nx;i++)
@@ -119,11 +124,11 @@ int main(int argc, char **argv)
 			}
 
 	sprintf(fxout,"vtot.%04d.dat",isnap);
-	fp = fopen(fxout,"w");
-	fwrite(fp,&A.nx,1,sizeof(int));
-	fwrite(fp,&A.ny,1,sizeof(int));
-	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
-	fclose(fp);
+  fp = fopen(fxout,"w");
+  fwrite(&A.nx,sizeof(int),1,fp);
+  fwrite(&A.ny,sizeof(int),1,fp);
+  fwrite(xout,sizeof(double),A.nx*A.ny,fp);
+  fclose(fp);
 
 	//x velocity next
 	for(int i=0;i<A.nx;i++)
@@ -142,10 +147,10 @@ int main(int argc, char **argv)
 
 	sprintf(fxout,"vx.%04d.dat",isnap);
 	fp = fopen(fxout,"w");
-	fwrite(fp,&A.nx,1,sizeof(int));
-	fwrite(fp,&A.ny,1,sizeof(int));
-	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
-	fclose(fp);
+  fwrite(&A.nx,sizeof(int),1,fp);
+  fwrite(&A.ny,sizeof(int),1,fp);
+  fwrite(xout,sizeof(double),A.nx*A.ny,fp);
+  fclose(fp);
 
 
 	//y velocity next
@@ -164,11 +169,11 @@ int main(int argc, char **argv)
 			}
 
 	sprintf(fxout,"vy.%04d.dat",isnap);
-	fp = fopen(fxout,"w");
-	fwrite(fp,&A.nx,1,sizeof(int));
-	fwrite(fp,&A.ny,1,sizeof(int));
-	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
-	fclose(fp);
+  fp = fopen(fxout,"w");
+  fwrite(&A.nx,sizeof(int),1,fp);
+  fwrite(&A.ny,sizeof(int),1,fp);
+  fwrite(xout,sizeof(double),A.nx*A.ny,fp);
+  fclose(fp);
 
 
 	//z velocity next
@@ -188,11 +193,11 @@ int main(int argc, char **argv)
 			}
 
 	sprintf(fxout,"vz.%04d.dat",isnap);
-	fp = fopen(fxout,"w");
-	fwrite(fp,&A.nx,1,sizeof(int));
-	fwrite(fp,&A.ny,1,sizeof(int));
-	fwrite(fp,xout,A.nx*A.ny,sizeof(double));
-	fclose(fp);
+  fp = fopen(fxout,"w");
+  fwrite(&A.nx,sizeof(int),1,fp);
+  fwrite(&A.ny,sizeof(int),1,fp);
+  fwrite(xout,sizeof(double),A.nx*A.ny,fp);
+  fclose(fp);
 
 	free(xout);
 
